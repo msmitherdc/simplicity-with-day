@@ -5,13 +5,14 @@
   "companyName": "MSmith",
   "versionCode": 1,
   "versionLabel": "1.0.0",
-  "capabilities": [ "configurable" ],
+  "capabilities": [ "location", "configurable"],
   "watchapp": {
     "watchface": true
   },
   "appKeys": {
     "temperature": 1,
-    "icon": 0
+    "icon": 0,
+    "invert_color": 2
   },
   "resources": {
     "media": [

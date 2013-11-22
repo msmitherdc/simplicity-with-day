@@ -71,7 +71,7 @@ var imageId = {
   'rain': RAIN,
   'nt_rain': RAIN,
   'snow': SNOW,
-  'nt_snow': SNOW
+  'nt_snow': SNOW,
   'sleet': HAIL,
   'wind': WINDY,
   'fog': HAZE,
@@ -87,12 +87,16 @@ var imageId = {
 
 var options = JSON.parse(localStorage.getItem('options'));
 console.log('read options: ' + JSON.stringify(options));
-if (options === null) options = { "use_gps" : "true", "location" : "", "units" : "fahrenheit"};
+if (options === null) options = { "use_gps" : "true",
+                                   "location" : "",
+                                   "units" : "fahrenheit",
+                                   "invert_color" : "false"};
 
 function getWeatherFromLatLong(latitude, longitude) {
   var response;
   var key = "b73f0bdb0c4a6c69";
   var req = new XMLHttpRequest();
+  var celsius = options['units']=='celsius';
   var url = "http://api.wunderground.com/api/"+key+"/forecast/geolookup/conditions/astronomy/q/"+latitude+","+longitude+".json"
   //var url = "http://api.flickr.com/services/rest/?method=flickr.places.findByLatLon&api_key=" + key + "&lat=" + latitude + "&lon=" + longitude + "&accuracy=16&format=json&nojsoncallback=1";
   req.open('GET', url, true);
@@ -102,8 +106,12 @@ function getWeatherFromLatLong(latitude, longitude) {
         console.log(req.responseText);
         response = JSON.parse(req.responseText);
         if (response) {
-          //temperature = (celsius ? response.current_observation.temp_c : response.current_observation.temp_c) + (celsius ? "\u00B0C" : "\u00B0F");
-          temperature =  response.current_observation.temp_f +  "\u00B0F";
+        	if (celsius){
+               temperature = response.current_observation.temp_c + "\u00B0C";
+             }else{
+             	 temperature = response.current_observation.temp_f + "\u00B0F";
+          }  	 
+          //temperature =  response.current_observation.temp_f +  "\u00B0F";
           //icon = imageId[condition.code];
           icon = imageId[response.current_observation.icon];
           console.log("temp " + temperature);
@@ -111,7 +119,8 @@ function getWeatherFromLatLong(latitude, longitude) {
           console.log("condition " + response.current_observation.weather);
           Pebble.sendAppMessage({
             "icon":icon,
-            "temperature":temperature
+            "temperature":temperature,
+            "invert_color" : (options["invert_color"] == "true" ? 1 : 0),
           });
         }
       } else {
@@ -125,6 +134,7 @@ function getWeatherFromLatLong(latitude, longitude) {
 function getWeatherFromLocation(location_name) {
   var response;
   var key = "b73f0bdb0c4a6c69";
+  var celsius = options['units']=='celsius';
   var req = new XMLHttpRequest();
   var url = "http://api.wunderground.com/api/"+key+"/forecast/geolookup/conditions/astronomy/q/"+location_name+".json"
   var req = new XMLHttpRequest();
@@ -138,7 +148,11 @@ function getWeatherFromLocation(location_name) {
           //var condition = response.query.results.channel.item.condition;
           //var condition = response.
           //temperature = condition.temp + (celsius ? "\u00B0C" : "\u00B0F");
-          temperature = response.current_observation.temp_f + "\u00B0F";
+          if (celsius){
+               temperature = response.current_observation.temp_c + "\u00B0C";
+             }else{
+             	 temperature = response.current_observation.temp_f + "\u00B0F";
+          } //temperature = response.current_observation.temp_f + "\u00B0F";
           //icon = imageId[condition.code];
           icon = imageId[response.current_observation.icon];
           console.log("temp " + temperature);
@@ -146,7 +160,8 @@ function getWeatherFromLocation(location_name) {
           console.log("condition " + response.current_observation.weather);
           Pebble.sendAppMessage({
             "icon":icon,
-            "temperature":temperature
+            "temperature":temperature,
+            "invert_color" : (options["invert_color"] == "true" ? 1 : 0),
           });
         }
       } else {
@@ -187,7 +202,8 @@ Pebble.addEventListener('showConfiguration', function(e) {
   var uri = 'http://tallerthenyou.github.io/simplicity-with-day/configuration.html?' +
     'use_gps=' + encodeURIComponent(options['use_gps']) +
     '&location=' + encodeURIComponent(options['location']) +
-    '&units=' + encodeURIComponent(options['units']);
+    '&units=' + encodeURIComponent(options['units']) +
+    '&invert_color=' + encodeURIComponent(options['invert_color']);
   console.log('showing configuration at uri: ' + uri);
 
   Pebble.openURL(uri);
@@ -199,13 +215,14 @@ Pebble.addEventListener('webviewclosed', function(e) {
     localStorage.setItem('options', JSON.stringify(options));
     console.log('storing options: ' + JSON.stringify(options));
     updateWeather();
+
   } else {
     console.log('no options received');
   }
 });
-
 Pebble.addEventListener("ready", function(e) {
   console.log("connect!" + e.ready);
+  console.log("mds weather loading....");
   updateWeather();
   setInterval(function() {
     console.log("timer fired");
