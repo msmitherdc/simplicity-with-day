@@ -1,8 +1,8 @@
 {
   "uuid": "1f0b0701-cc8f-47ec-86e7-7181397f9a8e",
-  "shortName": "Simple Weather",
-  "longName": "Simplicity inspired with weather",
-  "companyName": "John Flanagan",
+  "shortName": "Simple MDS Weather",
+  "longName": "Simplicity MDS inspired with weather",
+  "companyName": "MSmith",
   "versionCode": 1,
   "versionLabel": "1.0.0",
   "capabilities": [ "configurable" ],
