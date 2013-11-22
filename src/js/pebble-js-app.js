@@ -13,7 +13,7 @@ var CLOUDY = 11;
 var STORM = 12;
 var NA = 13;
 
-var imageId = {
+/*var imageId = {
   0 : STORM, //tornado
   1 : STORM, //tropical storm
   2 : STORM, //hurricane
@@ -64,6 +64,26 @@ var imageId = {
   47 : STORM, //isolated thundershowers
   3200 : NA, //not available
 };
+*/
+var imageId = {
+  'clear': CLEAR_DAY,
+  'nt_clear': CLEAR_NIGHT,
+  'rain': RAIN,
+  'nt_rain': RAIN,
+  'snow': SNOW,
+  'nt_snow': SNOW
+  'sleet': HAIL,
+  'wind': WINDY,
+  'fog': HAZE,
+  'cloudy': CLOUDY,
+  'partlycloudy': PARTLY_CLOUDY_DAY,
+  'nt_partlycloudy': PARTLY_CLOUDY_NIGHT,
+  'chancetstorms': STORM,
+  'rain_snow': SNOW,
+  'snow_sleet': SNOW,
+  'cold': COLD,
+  'hot': CLEAR_DAY,
+};
 
 var options = JSON.parse(localStorage.getItem('options'));
 console.log('read options: ' + JSON.stringify(options));
@@ -82,8 +102,16 @@ function getWeatherFromLatLong(latitude, longitude) {
         console.log(req.responseText);
         response = JSON.parse(req.responseText);
         if (response) {
-          woeid = response.places.place[0].woeid;
-          getWeatherFromWoeid(woeid);
+          temperature = (celsius ? response.current_observation.temp_c : response.current_observation.temp_c) + (celsius ? "\u00B0C" : "\u00B0F");
+          //icon = imageId[condition.code];
+          icon = imageId[response.current_observation.icon]
+          console.log("temp " + temperature);
+          console.log("icon " + icon);
+          console.log("condition " + response.current_observation.weather);
+          Pebble.sendAppMessage({
+            "icon":icon,
+            "temperature":temperature,
+          });
         }
       } else {
         console.log("Error");
@@ -95,10 +123,9 @@ function getWeatherFromLatLong(latitude, longitude) {
 
 function getWeatherFromLocation(location_name) {
   var response;
-  var woeid = -1;
-
-  var query = encodeURI("select woeid from geo.places(1) where text=\"" + location_name + "\"");
-  var url = "http://query.yahooapis.com/v1/public/yql?q=" + query + "&format=json";
+  var key = "b73f0bdb0c4a6c69";
+  var req = new XMLHttpRequest();
+  var url = "http://api.wunderground.com/api/"+key+"/forecast/geolookup/conditions/astronomy/q/"+location_name+".json"
   var req = new XMLHttpRequest();
   req.open('GET', url, true);
   req.onload = function(e) {
@@ -129,41 +156,6 @@ function getWeatherFromLocation(location_name) {
   req.send(null);
 }
 
-function getWeatherFromWoeid(woeid) {
-  console.log("weoid2: " + woeid);
-
-  var celsius = options['units'] == 'celsius';
-  var query = encodeURI("select item.condition from weather.forecast where woeid = " + woeid +
-                        " and u = " + (celsius ? "\"c\"" : "\"f\""));
-  var url = "http://query.yahooapis.com/v1/public/yql?q=" + query + "&format=json";
-
-  var response;
-  var req = new XMLHttpRequest();
-  console.log(url);
-  req.open('GET', url, true);
-  req.onload = function(e) {
-    if (req.readyState == 4) {
-      if (req.status == 200) {
-        response = JSON.parse(req.responseText);
-        if (response) {
-          var condition = response.query.results.channel.item.condition;
-          temperature = condition.temp + (celsius ? "\u00B0C" : "\u00B0F");
-          icon = imageId[condition.code];
-          console.log("temp " + temperature);
-          console.log("icon " + icon);
-          console.log("condition " + condition.text);
-          Pebble.sendAppMessage({
-            "icon":icon,
-            "temperature":temperature,
-          });
-        }
-      } else {
-        console.log("Error");
-      }
-    }
-  }
-  req.send(null);
-}
 
 function updateWeather() {
   if (options['use_gps'] == "true") {
