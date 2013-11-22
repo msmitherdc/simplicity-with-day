@@ -104,7 +104,7 @@ function getWeatherFromLatLong(latitude, longitude) {
         if (response) {
           temperature = (celsius ? response.current_observation.temp_c : response.current_observation.temp_c) + (celsius ? "\u00B0C" : "\u00B0F");
           //icon = imageId[condition.code];
-          icon = imageId[response.current_observation.icon]
+          icon = imageId[response.current_observation.icon];
           console.log("temp " + temperature);
           console.log("icon " + icon);
           console.log("condition " + response.current_observation.weather);
