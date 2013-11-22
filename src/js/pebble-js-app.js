@@ -71,10 +71,10 @@ if (options === null) options = { "use_gps" : "true", "location" : "", "units" :
 
 function getWeatherFromLatLong(latitude, longitude) {
   var response;
-  var woeid = -1;
-  var key = "799d170dc115b0fbf01834005444ed4d";
+  var key = "b73f0bdb0c4a6c69";
   var req = new XMLHttpRequest();
-  var url = "http://api.flickr.com/services/rest/?method=flickr.places.findByLatLon&api_key=" + key + "&lat=" + latitude + "&lon=" + longitude + "&accuracy=16&format=json&nojsoncallback=1";
+  var url = "http://api.wunderground.com/api/"+key+"/forecast/geolookup/conditions/astronomy/q/"+latitude+","+longitude+".json"
+  //var url = "http://api.flickr.com/services/rest/?method=flickr.places.findByLatLon&api_key=" + key + "&lat=" + latitude + "&lon=" + longitude + "&accuracy=16&format=json&nojsoncallback=1";
   req.open('GET', url, true);
   req.onload = function(e) {
     if (req.readyState == 4) {
@@ -107,8 +107,19 @@ function getWeatherFromLocation(location_name) {
         console.log(req.responseText);
         response = JSON.parse(req.responseText);
         if (response) {
-          woeid = response.query.results.place.woeid;
-          getWeatherFromWoeid(woeid);
+          //var condition = response.query.results.channel.item.condition;
+          //var condition = response.
+          //temperature = condition.temp + (celsius ? "\u00B0C" : "\u00B0F");
+          temperature = (celsius ? response.current_observation.temp_c : response.current_observation.temp_c) + (celsius ? "\u00B0C" : "\u00B0F");
+          //icon = imageId[condition.code];
+          icon = imageId[response.current_observation.icon]
+          console.log("temp " + temperature);
+          console.log("icon " + icon);
+          console.log("condition " + response.current_observation.weather);
+          Pebble.sendAppMessage({
+            "icon":icon,
+            "temperature":temperature,
+          });
         }
       } else {
         console.log("Error");
