@@ -82,7 +82,7 @@ var imageId = {
   'rain_snow': SNOW,
   'snow_sleet': SNOW,
   'cold': COLD,
-  'hot': CLEAR_DAY,
+  'hot': CLEAR_DAY
 };
 
 var options = JSON.parse(localStorage.getItem('options'));
@@ -102,7 +102,8 @@ function getWeatherFromLatLong(latitude, longitude) {
         console.log(req.responseText);
         response = JSON.parse(req.responseText);
         if (response) {
-          temperature = (celsius ? response.current_observation.temp_c : response.current_observation.temp_c) + (celsius ? "\u00B0C" : "\u00B0F");
+          //temperature = (celsius ? response.current_observation.temp_c : response.current_observation.temp_c) + (celsius ? "\u00B0C" : "\u00B0F");
+          temperature =  response.current_observation.temp_f +  "\u00B0F";
           //icon = imageId[condition.code];
           icon = imageId[response.current_observation.icon];
           console.log("temp " + temperature);
@@ -110,7 +111,7 @@ function getWeatherFromLatLong(latitude, longitude) {
           console.log("condition " + response.current_observation.weather);
           Pebble.sendAppMessage({
             "icon":icon,
-            "temperature":temperature,
+            "temperature":temperature
           });
         }
       } else {
@@ -137,7 +138,7 @@ function getWeatherFromLocation(location_name) {
           //var condition = response.query.results.channel.item.condition;
           //var condition = response.
           //temperature = condition.temp + (celsius ? "\u00B0C" : "\u00B0F");
-          temperature = (celsius ? response.current_observation.temp_c : response.current_observation.temp_c) + (celsius ? "\u00B0C" : "\u00B0F");
+          temperature = response.current_observation.temp_f + "\u00B0F";
           //icon = imageId[condition.code];
           icon = imageId[response.current_observation.icon];
           console.log("temp " + temperature);
@@ -145,7 +146,7 @@ function getWeatherFromLocation(location_name) {
           console.log("condition " + response.current_observation.weather);
           Pebble.sendAppMessage({
             "icon":icon,
-            "temperature":temperature,
+            "temperature":temperature
           });
         }
       } else {
